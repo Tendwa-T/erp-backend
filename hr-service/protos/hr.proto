@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package hr;
+
+service HRService {
+    rpc GetEmployeeByID (EmployeeRequest) returns (EmployeeResponse);
+    
+    rpc AddEmployee (AddEmployeeRequest) returns (AddEmployeeResponse);
+
+    rpc CheckAccess (CheckAccessRequest) returns (CheckAccessResponse);
+}
+
+message AddEmployeeRequest{
+  string name = 1;
+  string email = 2;
+  string department=3;
+  string role =4;
+}
+
+message CheckAccessRequest{
+  string user_id = 1;
+  string role = 2;
+}
+
+message CheckAccessResponse {
+  bool access_granted = 1;
+  string message = 2;
+}
+
+message AddEmployeeResponse{
+  string message =1;
+}
+
+message EmployeeRequest {
+    string employee_id = 1;
+}
+
+message EmployeeResponse{
+    string employee_id = 1;
+    string name = 2;
+    string email = 3;
+    string department = 4;
+    string role = 5;
+}
