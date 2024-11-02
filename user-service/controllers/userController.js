@@ -41,6 +41,15 @@ const loginUser = async (req, res) => {
     const { email, pass: password } = req.body;
 
     const user = await User.findOne({ email });
+
+    if (user.passwordResetRequired) {
+      return res.status(200).json({
+        data: {},
+        message: `Password Reset Required`,
+        resetRequired: true,
+        userID: user._id,
+      });
+    }
     if (!user)
       return res
         .status(404)
@@ -76,7 +85,39 @@ const loginUser = async (req, res) => {
   }
 };
 
+async function resetPassword(req, res) {
+  try {
+    const { userID, newPassword } = req.body;
+    await connectDB("user");
+    const user = await User.findById(userID);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ data: {}, message: "User Not found", success: false });
+    }
+    const hashedPass = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPass;
+    user.passwordResetRequired = false;
+
+    await user.save();
+    return res.status(200).json({
+      data: {},
+      message: "Password Reset Successfull",
+      success: true,
+    });
+  } catch (err) {
+    console.log(err.message);
+    return res.status(500).json({
+      data: {},
+      message: `An Error Occured: ${err.message}`,
+      success: false,
+    });
+  } finally {
+    await disconnectDB();
+  }
+}
+
 module.exports = {
   loginUser,
-  registerUser,
+  resetPassword,
 };

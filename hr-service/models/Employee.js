@@ -10,14 +10,20 @@ const employeeSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  phone: String,
-  department: String,
+  phone: { type: String },
+  department: { type: String, required: true },
+  position: { type: String },
   role: {
     type: String,
     enum: ["admin", "employee"],
     default: "employee",
   },
-  salary: Number,
+  salary: { type: Number },
+  userID: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
   hireDate: {
     type: Date,
     default: Date.now,

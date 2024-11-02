@@ -25,6 +25,10 @@ const userSchema = new mongoose.Schema(
       enum: ["admin", "employee"],
       default: "employee",
     },
+    passwordResetRequired: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true },
 );
