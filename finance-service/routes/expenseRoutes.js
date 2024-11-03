@@ -5,7 +5,7 @@ const {
   reviewExpense,
   generateReport,
 } = require("../controllers/expenseController");
-const validateExpenseInput = require("../services/validation");
+const { validateExpenseInput } = require("../services/validation");
 const router = express.Router();
 
 router.post("/", validateExpenseInput, recordExpense);

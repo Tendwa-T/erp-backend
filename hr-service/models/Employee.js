@@ -12,7 +12,7 @@ const employeeSchema = new mongoose.Schema({
   },
   phone: { type: String },
   department: { type: String, required: true },
-  position: { type: String },
+  skills: [{ type: String }],
   role: {
     type: String,
     enum: ["admin", "employee"],
@@ -33,6 +33,18 @@ const employeeSchema = new mongoose.Schema({
     enum: ["active", "inactive"],
     default: "active",
   },
+  assignedProjects: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Project",
+    },
+  ],
+  certifications: [
+    {
+      type: String,
+      expiryDate: Date,
+    },
+  ],
 });
 
 module.exports = mongoose.model("Employee", employeeSchema);

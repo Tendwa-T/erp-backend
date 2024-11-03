@@ -1,13 +1,15 @@
 const Attendance = require("../models/Attendance");
 const { connectDB, disconnectDB } = require("../config/database");
 const Employee = require("../models/Employee");
+const Project = require("../../project-service/models/project");
 
 exports.checkIn = async (req, res) => {
   try {
     await connectDB("hr");
-    const { employeeID, checkIn } = req.body;
+    const { employeeID, checkIn, projectID } = req.body;
 
     const existingEmployee = await Employee.findById(employeeID);
+
     if (!existingEmployee) {
       return res.status(404).json({
         data: {},
@@ -15,6 +17,15 @@ exports.checkIn = async (req, res) => {
         success: false,
       });
     }
+    const project = await Project.findById(projectID);
+    if (!project) {
+      return res.status(404).json({
+        data: {},
+        message: "Project Not Found",
+        success: false,
+      });
+    }
+
     const existingRecord = await Attendance.findOne({
       employeeID,
       date: {
@@ -30,6 +41,7 @@ exports.checkIn = async (req, res) => {
     const attendance = new Attendance({
       employeeID,
       checkIn: new Date(checkIn),
+      projectID,
     });
     await attendance.save();
     return res.status(201).json({

@@ -16,6 +16,10 @@ const attendanceSchema = new mongoose.Schema({
   checkOut: {
     type: Date,
   },
+  projectID: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Project",
+  },
 });
 
 module.exports = mongoose.model("Attendance", attendanceSchema);
