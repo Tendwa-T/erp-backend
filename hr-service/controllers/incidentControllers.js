@@ -1,11 +1,9 @@
-const { connectDB, disconnectDB } = require("../config/database");
 const Incident = require("../models/Incident");
 
 async function reportIncident(req, res) {
   const { employeeID, projectID, description, severity } = req.body;
 
   try {
-    await connectDB("incident");
     const incident = new Incident({
       employeeID,
       projectID,
@@ -26,8 +24,6 @@ async function reportIncident(req, res) {
       message: `An Error occurred`,
       success: false,
     });
-  } finally {
-    await disconnectDB();
   }
 }
 

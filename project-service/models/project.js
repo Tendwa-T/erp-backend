@@ -26,6 +26,10 @@ const ProjectSchema = new mongoose.Schema({
   assignedEmployees: [
     { type: mongoose.Schema.Types.ObjectId, ref: "Employee" },
   ],
+  status: {
+    type: String,
+    enum: ["Ongoing"],
+  },
   expenses: [{ type: mongoose.Schema.Types.ObjectId, ref: "Expense" }],
   startDate: { type: Date, required: true },
   endDate: { type: Date },

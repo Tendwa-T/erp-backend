@@ -10,7 +10,7 @@ const payrollSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  bonus: {
+  allowances: {
     type: Number,
     default: 0,
   },
@@ -18,12 +18,21 @@ const payrollSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  overtimeHours: {
+    type: Number,
+    default: 0,
+  },
+  overtimeRate: {
+    type: Number,
+    default: 1.5,
+  },
   tax: {
     type: Number,
     required: true,
   },
-  netPay: {
+  finalSalary: {
     type: Number,
+    required: true,
   },
   paymentDate: {
     type: Date,
@@ -38,7 +47,8 @@ const payrollSchema = new mongoose.Schema({
 
 payrollSchema.pre("save", function (next) {
   this.tax = this.baseSalary * 0.16;
-  this.netPay = this.baseSalary + this.bonus - this.deductions - this.tax;
+  this.finalSalary =
+    this.baseSalary + this.allowances - this.deductions - this.tax;
   next();
 });
 

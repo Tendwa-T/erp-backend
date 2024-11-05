@@ -4,7 +4,6 @@ const Project = require("../models/project");
 async function createProject(req, res) {
   const { name, description, budget, startDate, endDate } = req.body;
   try {
-    await connectDB("project");
     const project = new Project({
       name,
       description,
@@ -30,14 +29,11 @@ async function createProject(req, res) {
       message: `An Error: ${err.message}`,
       success: false,
     });
-  } finally {
-    await disconnectDB();
   }
 }
 
 async function getProjects(req, res) {
   try {
-    await connectDB("project");
     const projects = await Project.find().populate(
       "assignedEmployees expenses",
     );
@@ -64,7 +60,7 @@ async function getProjects(req, res) {
 async function getProject(req, res) {
   const { id } = req.params;
   try {
-    await connectDB("project");
+    await connectDB();
     const project = await Project.findById(id).populate(
       "assignedEmployees expenses",
     );
@@ -85,8 +81,6 @@ async function getProject(req, res) {
       message: `An Error Occurred: ${err.message}`,
       success: false,
     });
-  } finally {
-    await disconnectDB();
   }
 }
 
@@ -94,7 +88,6 @@ async function updateProject(req, res) {
   const { id } = req.params;
   const { name, description, budget, startDate, endDate } = req.body;
   try {
-    await connectDB("project");
     const project = await Project.findByIdAndUpdate(
       id,
       { name, description, "budget.totalBudget": budget, startDate, endDate },
@@ -119,8 +112,6 @@ async function updateProject(req, res) {
       message: `An Error Occurred: ${err.message}`,
       success: false,
     });
-  } finally {
-    await disconnectDB();
   }
 }
 
@@ -128,7 +119,6 @@ async function deleteProject(req, res) {
   const { id } = req.params;
 
   try {
-    await connectDB("project");
     const project = await Project.findByIdAndDelete(id);
     if (!project) {
       return res.status(404).json({
@@ -149,8 +139,6 @@ async function deleteProject(req, res) {
       message: `An Error Occurred: ${err.message}`,
       success: false,
     });
-  } finally {
-    await disconnectDB();
   }
 }
 
@@ -159,7 +147,6 @@ async function assignEmployees(req, res) {
   const { employeeIDs } = req.body;
 
   try {
-    await connectDB("project");
     const project = await Project.findByIdAndUpdate(
       id,
       { $addToSet: { assignedEmployees: { $each: employeeIDs } } },
@@ -193,7 +180,7 @@ async function addMilestone(req, res) {
   const { milestone } = req.body;
 
   try {
-    await connectDB("project");
+    await connectDB();
     const project = await Project.findByIdAndUpdate(
       id,
       { $push: { milestones: milestone } }, //milestone should include name, startDate, endDate, allocatedBudget,
@@ -220,8 +207,6 @@ async function addMilestone(req, res) {
       message: `An Error Occured: ${err.message}`,
       success: false,
     });
-  } finally {
-    await disconnectDB();
   }
 }
 

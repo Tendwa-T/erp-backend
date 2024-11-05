@@ -18,7 +18,7 @@ const employeeSchema = new mongoose.Schema({
     enum: ["admin", "employee"],
     default: "employee",
   },
-  salary: { type: Number },
+  salary: { type: Number, required: true },
   userID: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",

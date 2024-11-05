@@ -1,12 +1,10 @@
-const { connectDB, disconnectDB } = require("../config/database");
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const registerUser = async (req, res) => {
   try {
-    await connectDB("users");
-    const { name, email, password } = req.body;
+    const { name, email, password, department, role } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser)
@@ -16,7 +14,13 @@ const registerUser = async (req, res) => {
 
     const hashedPass = await bcrypt.hash(password, 10);
 
-    const user = new User({ name, email, password: hashedPass });
+    const user = new User({
+      name,
+      email,
+      password: hashedPass,
+      role,
+      department,
+    });
     await user.save();
 
     return res.status(201).json({
@@ -25,31 +29,21 @@ const registerUser = async (req, res) => {
       success: true,
     });
   } catch (err) {
-    console.error(err);
-    return res
-      .status(500)
-      .json({ data: {}, message: `Error: ${err.message}`, success: false });
-  } finally {
-    await disconnectDB();
+    console.error(err.message);
+    return res.status(500).json({
+      data: {},
+      message: `Error: ${err.message}`,
+      success: false,
+    });
   }
 };
 
 const loginUser = async (req, res) => {
   try {
-    await connectDB("users");
-
     const { email, pass: password } = req.body;
 
     const user = await User.findOne({ email });
 
-    if (user.passwordResetRequired) {
-      return res.status(200).json({
-        data: {},
-        message: `Password Reset Required`,
-        resetRequired: true,
-        userID: user._id,
-      });
-    }
     if (!user)
       return res
         .status(404)
@@ -66,12 +60,22 @@ const loginUser = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "1h" },
     );
+
     const userData = {
       name: user.name,
       email: user.email,
       role: user.role,
       token,
     };
+    if (user.passwordResetRequired) {
+      return res.status(200).json({
+        data: userData,
+        message: `Password Reset Required`,
+        resetRequired: true,
+        userID: user._id,
+        success: true,
+      });
+    }
     console.log(`User logged in: ${user.name}`);
     return res
       .status(200)
@@ -80,15 +84,12 @@ const loginUser = async (req, res) => {
     return res
       .status(500)
       .json({ data: {}, message: `Error: ${err.message}`, success: false });
-  } finally {
-    await disconnectDB();
   }
 };
 
 async function resetPassword(req, res) {
   try {
     const { userID, newPassword } = req.body;
-    await connectDB("user");
     const user = await User.findById(userID);
     if (!user) {
       return res
@@ -112,12 +113,11 @@ async function resetPassword(req, res) {
       message: `An Error Occured: ${err.message}`,
       success: false,
     });
-  } finally {
-    await disconnectDB();
   }
 }
 
 module.exports = {
+  registerUser,
   loginUser,
   resetPassword,
 };

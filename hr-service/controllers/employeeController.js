@@ -1,37 +1,49 @@
+const dotenv = require("dotenv");
+dotenv.config();
 const mongoose = require("mongoose");
 const Employee = require("../models/Employee");
-const User = require("../../user-service/models/User");
-const { connectDB, disconnectDB } = require("../config/database");
+const bcrypt = require("bcrypt");
+const userService = process.env.USER_SERVICE_URL;
 
-exports.addEmployee = async (req, res) => {
+async function addEmployee(req, res) {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    await connectDB("hr");
-    const { name, email, phone, department, position, role, salary } = req.body;
+    const { name, email, phone, department, role, skills, salary } = req.body;
+    console.log("Request Received");
+    console.log(userService);
+
+    // Handle the user First
+
+    const hashedPass = await bcrypt.hash("P@$$-Wad", 10);
     const userData = {
       name,
       email,
-      password: "P@$$-Wad",
+      password: hashedPass,
       department,
       role,
     };
+    const res = await fetch(`${userService}/users/create`, {
+      method: "POST",
+      body: JSON.stringify(userData),
+    });
+    console.log(res);
+
+    const user = await res.json();
+
+    // Handle Employee Next
 
     const empData = {
       name,
       email,
       phone,
       department,
-      position,
       role,
+      skills,
       salary,
     };
-
-    const user = new User(userData);
-    await user.save({ session });
-
     const employee = new Employee({ ...empData, userID: user._id });
-    await employee.save({ session });
+    await employee.save();
 
     await session.commitTransaction();
     session.endSession();
@@ -48,14 +60,11 @@ exports.addEmployee = async (req, res) => {
       message: `An Error Occured: ${err.message}`,
       success: false,
     });
-  } finally {
-    await disconnectDB();
   }
-};
+}
 
-exports.getEmployees = async (req, res) => {
+async function getEmployees(req, res) {
   try {
-    await connectDB("hr");
     const employees = await Employee.find();
     return res
       .status(200)
@@ -67,7 +76,10 @@ exports.getEmployees = async (req, res) => {
       message: `An Error Occurred: ${err.message}`,
       success: false,
     });
-  } finally {
-    await disconnectDB();
   }
+}
+
+module.exports = {
+  addEmployee,
+  getEmployees,
 };

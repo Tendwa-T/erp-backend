@@ -18,7 +18,6 @@ const userSchema = new mongoose.Schema(
     department: {
       type: String,
       required: true,
-      default: "sales",
     },
     role: {
       type: String,

@@ -1,9 +1,7 @@
-const { connectDB, disconnectDB } = require("../config/database");
 const Leave = require("../models/Leave");
 
 async function applyForLeave(req, res) {
   try {
-    await connectDB("hr");
     const { startDate, endDate, reason } = req.body;
     const employeeID = req.user.userId;
 
@@ -20,14 +18,11 @@ async function applyForLeave(req, res) {
       message: `An Error occurred: ${err.message}`,
       success: false,
     });
-  } finally {
-    await disconnectDB();
   }
 }
 
 async function getIndividualLeave(req, res) {
   try {
-    await connectDB("hr");
     const leaves = await Leave.find({ employeeID: req.user.userId });
     return res
       .status(200)
@@ -38,14 +33,11 @@ async function getIndividualLeave(req, res) {
       message: `An Error Occurred: ${err.message}`,
       success: false,
     });
-  } finally {
-    await disconnectDB();
   }
 }
 
 async function getAllLeaveRequests(req, res) {
   try {
-    await connectDB("hr");
     const leaves = await Leave.find().populate("employeeID", "name department");
     return res.status(200).json({
       data: leaves,
@@ -59,14 +51,11 @@ async function getAllLeaveRequests(req, res) {
       message: `An Error Occurred: ${err.message}`,
       success: false,
     });
-  } finally {
-    await disconnectDB();
   }
 }
 
 async function respondToRequests(req, res) {
   try {
-    await connectDB("hr");
     const { status } = req.body;
     const { leaveID } = req.params.id;
     if (!["Approved", "Rejected"].includes(status)) {
@@ -97,14 +86,11 @@ async function respondToRequests(req, res) {
       message: `An Error Occurred: ${err.message}`,
       success: false,
     });
-  } finally {
-    await disconnectDB();
   }
 }
 
 async function cancelLeaveRequest(req, res) {
   try {
-    await connectDB("hr");
     const leave = await Leave.findOneAndDelete({
       _id: req.params.id,
       employeeID: req.user.id,
@@ -125,8 +111,6 @@ async function cancelLeaveRequest(req, res) {
       message: `An Error Occurred: ${err.message}`,
       success: false,
     });
-  } finally {
-    await disconnectDB();
   }
 }
 

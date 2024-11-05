@@ -6,7 +6,7 @@ const ExpenseSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    enum: ["Travel", "Office Supplies", "Utilities", "Other"],
+    enum: ["Transport", "Project", "Opertational", "Other"],
     required: true,
   },
   description: {
@@ -20,6 +20,10 @@ const ExpenseSchema = new mongoose.Schema({
     type: String,
     enum: ["Pending", "Approved", "Rejected"],
     default: "Pending",
+  },
+  projectID: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Project",
   },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,

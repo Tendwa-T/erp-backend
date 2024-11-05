@@ -1,11 +1,9 @@
-const { connectDB, disconnectDB } = require("../config/database");
 const Budget = require("../models/Budget");
 
 async function createBudget(req, res) {
   const { department, category, allocatedAmount, startDate, endDate } =
     req.body;
   try {
-    await connectDB("finance");
     const budget = new Budget({
       department,
       category,
@@ -26,15 +24,12 @@ async function createBudget(req, res) {
       message: `An Error Occurred: ${err.message}`,
       success: false,
     });
-  } finally {
-    await disconnectDB();
   }
 }
 
 async function updateSpending(req, res) {
   const { amount } = req.body;
   try {
-    await connectDB("finance");
     const budget = await Budget.findById(req.params.budgetID);
     if (!budget)
       return res
@@ -59,8 +54,6 @@ async function updateSpending(req, res) {
       message: `An Error Occurred: ${err.message}`,
       success: false,
     });
-  } finally {
-    await disconnectDB();
   }
 }
 
@@ -99,14 +92,11 @@ async function retrieveBudget(req, res) {
       message: `An Error Occurred: ${err.message}`,
       success: false,
     });
-  } finally {
-    await disconnectDB();
   }
 }
 
 async function generateReport(req, res) {
   try {
-    await connectDB("finance");
     const report = await Budget.aggregate([
       {
         $group: {
@@ -130,8 +120,6 @@ async function generateReport(req, res) {
       message: `An Error Occurred: ${err.message}`,
       success: false,
     });
-  } finally {
-    await disconnectDB();
   }
 }
 

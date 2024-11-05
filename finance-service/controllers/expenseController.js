@@ -1,10 +1,8 @@
-const { connectDB, disconnectDB } = require("../config/database");
 const Budget = require("../models/Budget");
 const Expense = require("../models/Expense");
 
 async function recordExpense(req, res) {
   try {
-    await connectDB("finance");
     const { amount, category, description, createdBy, department } = req.body;
     const budget = await Budget.findOne({
       department,
@@ -49,8 +47,6 @@ async function recordExpense(req, res) {
       message: `An Error: ${err.message}`,
       success: false,
     });
-  } finally {
-    await disconnectDB();
   }
 }
 
@@ -71,7 +67,6 @@ async function retrieveExpenses(req, res) {
     };
   }
   try {
-    await connectDB("finance");
     const expenses = await Expense.find(filter);
     return res.status(200).json({
       data: expenses,
@@ -85,8 +80,6 @@ async function retrieveExpenses(req, res) {
       message: `An Error Occurred: ${err.message}`,
       success: false,
     });
-  } finally {
-    await disconnectDB();
   }
 }
 
@@ -102,7 +95,6 @@ async function reviewExpense(req, res) {
     });
   }
   try {
-    await connectDB("finance");
     const expense = await Expense.findById(expenseID);
     if (!expense) {
       return res.status(404).json({
@@ -146,8 +138,6 @@ async function reviewExpense(req, res) {
       message: `An Error Occurred: ${err.message}`,
       success: false,
     });
-  } finally {
-    await disconnectDB();
   }
 }
 
@@ -163,7 +153,6 @@ async function generateReport(req, res) {
   }
 
   try {
-    await connectDB("finance");
     const report = await Expense.aggregate([
       { $match: match },
       {
@@ -182,16 +171,11 @@ async function generateReport(req, res) {
     });
   } catch (err) {
     console.log(err.message);
-    return (
-      res,
-      status(500).json({
-        data: {},
-        meesage: `An Error Occurred: ${err.message}`,
-        success: false,
-      })
-    );
-  } finally {
-    await disconnectDB();
+    return res.status(500).json({
+      data: {},
+      meesage: `An Error Occurred: ${err.message}`,
+      success: false,
+    });
   }
 }
 

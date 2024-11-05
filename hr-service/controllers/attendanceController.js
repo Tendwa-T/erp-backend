@@ -2,10 +2,11 @@ const Attendance = require("../models/Attendance");
 const { connectDB, disconnectDB } = require("../config/database");
 const Employee = require("../models/Employee");
 const Project = require("../../project-service/models/project");
+const { createTimesheet } = require("./timesheetController");
 
 exports.checkIn = async (req, res) => {
   try {
-    await connectDB("hr");
+    await connectDB();
     const { employeeID, checkIn, projectID } = req.body;
 
     const existingEmployee = await Employee.findById(employeeID);
@@ -63,15 +64,22 @@ exports.checkIn = async (req, res) => {
 
 exports.checkOut = async (req, res) => {
   try {
-    await connectDB("hr");
-    const { employeeID, checkOut } = req.body;
+    await connectDB();
+    const { employeeID, checkOut, projectID } = req.body;
 
     const attendance = await Attendance.findOne({
       employeeID,
+      projectID,
       date: {
         $gte: new Date().setHours(0, 0, 0, 0),
       },
     });
+
+    const hrsWorked =
+      (attendance.checkOut - attendance.checkIn) / (1000 * 60 * 60);
+    const attendanceDate = attendance.checkIn.getDate();
+
+    await createTimesheet(employeeID, projectID, attendanceDate, hrsWorked);
 
     if (!attendance) {
       return res
@@ -100,7 +108,6 @@ exports.checkOut = async (req, res) => {
 
 exports.getAttendance = async (req, res) => {
   try {
-    await connectDB("hr");
     const { employeeID, startDate, endDate } = req.query;
 
     let filter = {};

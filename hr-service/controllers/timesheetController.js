@@ -1,9 +1,7 @@
-const { connectDB, disconnectDB } = require("../config/database");
 const Timesheet = require("../models/Timesheet");
 
 async function createTimesheet(employeeID, projectID, date, hoursWorked) {
   try {
-    await connectDB("timesheet");
     const timesheet = new Timesheet({
       employeeID,
       projectID,
@@ -11,6 +9,7 @@ async function createTimesheet(employeeID, projectID, date, hoursWorked) {
       hoursWorked,
     });
 
+    console.log(timesheet);
     await timesheet.save();
     return { data: timesheet, message: "Timesheet Saved", success: true };
   } catch (err) {
@@ -20,8 +19,6 @@ async function createTimesheet(employeeID, projectID, date, hoursWorked) {
       message: `An Error Occurred: ${err.message}`,
       success: false,
     };
-  } finally {
-    await disconnectDB();
   }
 }
 
