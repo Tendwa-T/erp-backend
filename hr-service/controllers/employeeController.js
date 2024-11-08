@@ -1,39 +1,36 @@
 const dotenv = require("dotenv");
 dotenv.config();
-const mongoose = require("mongoose");
 const Employee = require("../models/Employee");
-const bcrypt = require("bcrypt");
 const userService = process.env.USER_SERVICE_URL;
 
 async function addEmployee(req, res) {
-  const session = await mongoose.startSession();
-  session.startTransaction();
   try {
     const { name, email, phone, department, role, skills, salary } = req.body;
-    console.log("Request Received");
-    console.log(userService);
 
     // Handle the user First
-
-    const hashedPass = await bcrypt.hash("P@$$-Wad", 10);
+    const defaultPass = `Pass-${email}`;
     const userData = {
       name,
       email,
-      password: hashedPass,
+      password: defaultPass,
       department,
       role,
     };
-    const res = await fetch(`${userService}/users/create`, {
+    const userRes = await fetch(`${userService}/users/`, {
       method: "POST",
       body: JSON.stringify(userData),
+      headers: { "Content-Type": "application/json" },
     });
-    console.log(res);
 
-    const user = await res.json();
+    const user = await userRes.json();
+    if (!user.success) {
+      throw new Error(user.message);
+    }
 
     // Handle Employee Next
 
     const empData = {
+      userID: user.data._id,
       name,
       email,
       phone,
@@ -42,11 +39,10 @@ async function addEmployee(req, res) {
       skills,
       salary,
     };
-    const employee = new Employee({ ...empData, userID: user._id });
+
+    const employee = new Employee(empData);
     await employee.save();
 
-    await session.commitTransaction();
-    session.endSession();
     return res.status(200).json({
       data: { user, employee },
       message: "Employee Created with a User Account",
@@ -54,7 +50,6 @@ async function addEmployee(req, res) {
     });
   } catch (err) {
     console.log(err);
-    await session.abortTransaction();
     return res.status(500).json({
       data: {},
       message: `An Error Occured: ${err.message}`,

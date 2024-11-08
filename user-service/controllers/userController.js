@@ -24,7 +24,12 @@ const registerUser = async (req, res) => {
     await user.save();
 
     return res.status(201).json({
-      data: { name: user.name, email: user.email, role: user.role },
+      data: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
       message: "User Registered Successfully",
       success: true,
     });
@@ -41,6 +46,7 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
   try {
     const { email, pass: password } = req.body;
+    console.log(password);
 
     const user = await User.findOne({ email });
 
@@ -53,26 +59,26 @@ const loginUser = async (req, res) => {
     if (!isMatch)
       return res
         .status(403)
-        .json({ data: {}, message: "Invalid Credentials", success: false });
+        .json({ data: {}, message: "Invalid Password", success: false });
 
     const token = jwt.sign(
       { userId: user._id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" },
+      { expiresIn: "1h" }
     );
 
     const userData = {
+      userID: user._id,
       name: user.name,
       email: user.email,
       role: user.role,
+      resetPassword: user.passwordResetRequired,
       token,
     };
     if (user.passwordResetRequired) {
       return res.status(200).json({
         data: userData,
         message: `Password Reset Required`,
-        resetRequired: true,
-        userID: user._id,
         success: true,
       });
     }
