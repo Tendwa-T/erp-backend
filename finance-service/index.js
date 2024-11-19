@@ -23,5 +23,9 @@ app.use("/api/clients", clientRoutes);
 app.use("/api/invoices", invoiceRoutes);
 app.use("/api/assets", assetRoutes);
 
+app.get("/", async (req, res) => {
+  res.send("Finance Service online");
+});
+
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => console.log(`Finance Service running on Port ${PORT}`));

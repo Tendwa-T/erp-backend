@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 
 const authorize = (requiredRole) => (req, res, next) => {
   const token = req.header("Authorization")?.replace("Bearer ", "");
+
   if (!token) {
     return res
       .status(401)
@@ -15,7 +16,7 @@ const authorize = (requiredRole) => (req, res, next) => {
         success: false,
       });
     }
-    console.log(decoded);
+
     req.user = decoded;
 
     if (decoded.role !== requiredRole && decoded.role !== "admin") {

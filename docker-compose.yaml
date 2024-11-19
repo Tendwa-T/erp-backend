@@ -1,0 +1,34 @@
+
+services:
+  finance-service:
+    build: 
+      context: ./finance-service
+    env_file:
+      - ./finance-service/.env
+    ports:
+      - "8003:8003" # Adjust the port mapping as needed
+    image: "tendwa/erp-backend:finance"
+  hr-service:
+    build: 
+      context: ./hr-service
+    env_file:
+      - ./hr-service/.env
+    ports:
+      - "8002:8002" # Assuming different ports per service
+    image: "tendwa/erp-backend:hr"
+  project-service:
+    build: 
+      context: ./project-service
+    env_file:
+      - ./project-service/.env
+    ports:
+      - "8004:8004"
+    image: "tendwa/erp-backend:project"
+  user-service:
+    build: 
+      context: ./user-service
+    env_file:
+      - ./user-service/.env
+    ports:
+      - "8001:8001"
+    image: "tendwa/erp-backend:user"

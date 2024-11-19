@@ -1,6 +1,11 @@
+const dotenv = require("dotenv");
+dotenv.config();
+
 const User = require("../models/User");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+
+const hrService = process.env.HR_SERVICE_URL;
 
 const registerUser = async (req, res) => {
   try {
@@ -46,7 +51,6 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
   try {
     const { email, pass: password } = req.body;
-    console.log(password);
 
     const user = await User.findOne({ email });
 
@@ -67,14 +71,25 @@ const loginUser = async (req, res) => {
       { expiresIn: "1h" }
     );
 
-    const userData = {
-      userID: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      resetPassword: user.passwordResetRequired,
-      token,
-    };
+    const empReq = await fetch(`${hrService}/employees/${user._id}`);
+    let userData = {};
+    await empReq.json().then((data) => {
+      return (userData = {
+        userID: user._id,
+        name: user.name,
+        email: user.email,
+        department: user.department,
+        role: user.role,
+        skills: data.data.skills,
+        salary: data.data.salary,
+        status: data.data.status,
+        certifications: data.data.certifications,
+        projects: data.data.assignedProjects,
+        resetPassword: user.passwordResetRequired,
+        token,
+      });
+    });
+
     if (user.passwordResetRequired) {
       return res.status(200).json({
         data: userData,
@@ -82,7 +97,7 @@ const loginUser = async (req, res) => {
         success: true,
       });
     }
-    console.log(`User logged in: ${user.name}`);
+
     return res
       .status(200)
       .json({ data: userData, message: "Login Succesful", success: true });

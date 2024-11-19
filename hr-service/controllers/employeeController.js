@@ -74,7 +74,32 @@ async function getEmployees(req, res) {
   }
 }
 
+async function getEmployee(req, res) {
+  try {
+    const { id } = req.params;
+    const employee = await Employee.find({ userID: id });
+
+    if (!employee) {
+      return res
+        .status(404)
+        .json({ data: {}, message: `Employee Not Found`, success: false });
+    }
+
+    return res
+      .status(200)
+      .json({ data: employee[0], message: `Employee Fetched`, success: true });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      data: {},
+      message: `An Error Occurred: ${err.message}`,
+      success: false,
+    });
+  }
+}
+
 module.exports = {
   addEmployee,
   getEmployees,
+  getEmployee,
 };

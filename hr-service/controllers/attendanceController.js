@@ -1,12 +1,11 @@
 const Attendance = require("../models/Attendance");
-const { connectDB, disconnectDB } = require("../config/database");
+
 const Employee = require("../models/Employee");
-const Project = require("../../project-service/models/project");
+const projectURL = process.env.PROJECT_SERVICE_URL;
 const { createTimesheet } = require("./timesheetController");
 
 exports.checkIn = async (req, res) => {
   try {
-    await connectDB();
     const { employeeID, checkIn, projectID } = req.body;
 
     const existingEmployee = await Employee.findById(employeeID);
@@ -18,7 +17,7 @@ exports.checkIn = async (req, res) => {
         success: false,
       });
     }
-    const project = await Project.findById(projectID);
+    const project = await fetch(`${projectURL}/projects/${projectID}`);
     if (!project) {
       return res.status(404).json({
         data: {},
@@ -57,14 +56,11 @@ exports.checkIn = async (req, res) => {
       message: `An Error Occurred: ${err.message}`,
       success: false,
     });
-  } finally {
-    await disconnectDB();
   }
 };
 
 exports.checkOut = async (req, res) => {
   try {
-    await connectDB();
     const { employeeID, checkOut, projectID } = req.body;
 
     const attendance = await Attendance.findOne({
@@ -101,8 +97,6 @@ exports.checkOut = async (req, res) => {
       message: `An Error Occurred: ${err.message}`,
       success: false,
     });
-  } finally {
-    await disconnectDB();
   }
 };
 
@@ -122,7 +116,7 @@ exports.getAttendance = async (req, res) => {
     }
     const records = await Attendance.find(filter).populate(
       "employeeID",
-      "name email",
+      "name email"
     );
     return res
       .status(200)
@@ -134,7 +128,5 @@ exports.getAttendance = async (req, res) => {
       message: `An Error Occurred: ${err.message}`,
       success: false,
     });
-  } finally {
-    await disconnectDB();
   }
 };

@@ -19,6 +19,10 @@ app.use("/api/attendance", attendanceRoutes);
 app.use("/api/leaves", leaveRoutes);
 
 const PORT = process.env.PORT;
+
+app.get("/", async (req, res) => {
+  res.send("HR Service online");
+});
 app.listen(PORT, () => {
   console.log(`HR Service running on ${PORT}`);
 });
